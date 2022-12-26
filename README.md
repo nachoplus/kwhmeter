@@ -22,7 +22,7 @@ Adicionalmente optiene los precios de la energia oficiales de la web de REE http
 * TEUPCB: Precio correspondiente a los peajes y cargos
 * PCB: Precio total para el PVPC. Incorpora los dos anteriores mas el precio de la energia en los mercados mayoristas y otros conceptos menores.
 
-Este programa utiliza el directorio definido en la variable de entorno KALPA_HOME para almacenar las credenciales y el cache de precios del eSios. Por defecto KALPA_HOME es $HOME/.kalpa
+Este programa utiliza el directorio definido en la variable de entorno KWHMETER_HOME para almacenar las credenciales y el cache de precios del eSios. Por defecto KWHMETER_HOME es $HOME/.kwhmeter
 
 IMPORTANTE: Tanto los valores de energia como los de precio se almacenan a hora venciada. Es decir p.e. el consumo desde las 7:00 hasta las 7:59 se almacena con la marca de tiempo 8:00. Se tiene en cuenta el dia de cambio de hora y las timestamp están 'localizados' para la españa peninsular.
 
@@ -30,11 +30,11 @@ IMPORTANTE: Tanto los valores de energia como los de precio se almacenan a hora 
 
 Existen dos ejecutables de la linea de comandos (CLI): 
 
-* kalpa_set_credenciales SUMINISTRO DISTRIBUIDORA USER PASSWORD. Mediante este comando se crea o actualiza el fichero de configuración $KALPA_HOME/credenciales.yml donde se almacenan las credenciales correspondientes a un suministro concreto. 
-* kalpa. Es el comando principal mediante el cual se recuperan las medidas
+* kwhmeter_set_credenciales SUMINISTRO DISTRIBUIDORA USER PASSWORD. Mediante este comando se crea o actualiza el fichero de configuración $KWHMETER_HOME/credenciales.yml donde se almacenan las credenciales correspondientes a un suministro concreto. 
+* kwhmeter. Es el comando principal mediante el cual se recuperan las medidas
 
-> kalpa --help
-> Usage: kalpa_distribuidoras [OPTIONS] SUMINISTRO
+> kwhmeter --help
+> Usage: kwhmeter [OPTIONS] SUMINISTRO
 > 
 > Options:
 >   --lista-facturas                Muestra los periodos de facturación
