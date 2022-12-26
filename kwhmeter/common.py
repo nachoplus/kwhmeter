@@ -11,7 +11,7 @@ import logging
 timezone = pytz.timezone("Europe/Madrid")
 
 home = str(Path.home())
-data_dir=os.getenv('KALPA_HOME',f"{home}/.kalpa")
+data_dir=os.getenv('KWHMETER_HOME',f"{home}/.kwhmeter")
 credenciales_file=f'{data_dir}/distribuidoras.yml'
 pvpc_data_file=f'{data_dir}/esios_pvpc.pkl'
 
