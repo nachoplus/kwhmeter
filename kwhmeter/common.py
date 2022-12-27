@@ -20,7 +20,7 @@ def periodo_tarifario(fecha_hora:datetime.datetime)->str:
     fechahora=fecha_hora-datetime.timedelta(hours=1)
     spain_calendar=Spain()
     holidays=spain_calendar.holidays(fechahora.year)    
-    if fechahora in [x[0] for x in holidays]:
+    if fechahora.date() in [x[0] for x in holidays]:
         return 'P3'
     if fechahora.weekday()==5 or fechahora.weekday()==6:
         return 'P3'

@@ -117,19 +117,11 @@ class iberdrola:
             fechaDesde=start.strftime('%d-%m-%Y')
             end=(factura['fechaFin']-timedelta(hours=24))
             fechaHasta=end.strftime('%d-%m-%Y')
-            if False:
-                logging.debug(f"{factura['fechaInicio']},{factura['fechaFin']}")
-                if factura['fechaFin'] <=start:
-                    logging.debug("fechaFin anterior a start")
-                    continue
-                if factura['fechaInicio'] >=end:
-                    logging.debug("fechaInicio posterior a end")
-                    continue
             numero=factura['numero']
             #fechaDesde=factura['fechaInicio'].strftime('%d-%m-%Y')
             #fechaHasta=(factura['fechaFin']-timedelta(hours=24)).strftime('%d-%m-%Y')
             url= self.__obtener_consumo_facturado_url.format(numero,fechaDesde, fechaHasta)
-            logging.info(url)
+            logging.debug(url)
             response = self.__session.request("GET",url,headers=self.__headers)
             if response.status_code != 200:
                 raise ResponseException(response.status_code)
@@ -164,17 +156,10 @@ class iberdrola:
     def consumo(self,start,end):
         #recuperamos el consumo facturado que tiene ya los estimados y es mas fiable
         facturas=self.lista_facturas 
-        if False:
-            start_fac=facturas[facturas['fechaInicio']<=start]['fechaInicio'].max()
-            end_fac=facturas[facturas['fechaFin']>=end]['fechaFin'].min()
-            print(f"{start_fac} {end_fac}")
-            fac_desde=facturas[facturas['fechaInicio']==start_fac].index.to_list()
-            fac_hasta=facturas[facturas['fechaFin']==end_fac].index.to_list()
-            lista_fac=list(set(fac_hasta+fac_desde))
         mask= (facturas['fechaInicio']>=start) & (facturas['fechaInicio']<=end) | (facturas['fechaFin']>=start) & (facturas['fechaFin']<=end) 
         #| (facturas['fechaInicio']<=end & facturas['fechaFin']>=start)
         lista_fac=facturas[mask].index.to_list()
-        print(lista_fac)
+        logging.debug(f'Recuperando periodos de facturación:{lista_fac}')
         con_facturado=self.consumo_facturado(lista_fac)
         #si el periodo es mayor que lo registrado en el consumo facturado
         #lo completamos con el consumo contador
