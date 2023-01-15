@@ -80,6 +80,9 @@ class eredes:
         self.infoPS=self.infoPS()[0]
         self.direccion=self.infoPS['DIR'].strip()
         self.potencias={'P1':float(self.infoPS['POTENCIA'][0]),'P2':float(self.infoPS['POTENCIA'][1])}
+
+        self.datos={'potencias':self.potencias,'cups':self.cups,'direccion':self.direccion,'titular':self.titular,'DNI':self.DNI}
+        
         self.lista_facturas=self._facturas()
         self.nfacturas=self.lista_facturas.shape[0]
         self.factura_fechamin=self.lista_facturas.fechaInicio.min()

@@ -1,7 +1,7 @@
 import logging
 from .iberdrola import iberdrola
 from .eredes import eredes
-from .common import contador,timezone,data_dir, read_config
+from .common import suministro,contador,timezone,data_dir, read_config
 from .pvpc import pvpc,append_prices
 import os
 

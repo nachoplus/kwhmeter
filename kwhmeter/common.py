@@ -56,6 +56,10 @@ def write_config(suministro=None,distribuidora=None,user=None,password=None):
         yaml.dump(credenciales, f, default_flow_style=False)         
     return credenciales
 
+def suministro(domicilio):
+    credenciales=read_config()
+    suministro = contador(**credenciales[domicilio])
+    return suministro
 
 def contador(distribuidora=None,user=None,password=None):
     lista_distribuidoras=['iberdrola','eredes']
@@ -73,3 +77,59 @@ def contador(distribuidora=None,user=None,password=None):
     else:
         logging.error('Login invalido')
     return contador    
+
+def flex_consumos(domicilio,n=False,factura=False,fecha_ini=False,fecha_fin=False):
+    '''
+    recupera los consumos de un suministros basandose en uno 
+    de los siguienetes datos:
+    * el numero de orden de la factura
+    * el nombre (fecha) de la factura
+    * un periodo entre fechas
+    Los datos no usados deben ser False
+    '''
+    _suministro=suministro(domicilio)
+    datos=_suministro.datos
+    if n and n[0]==0: 
+        f=_suministro.facturas()
+        fecha_ini=f.fechaFin[0]+datetime.timedelta(hours=1)
+        fecha_fin=timezone.localize(datetime.datetime.now())
+        print(f"FACTURA EN CURSO. Fechas {fecha_ini} y {fecha_fin}")
+        df=_suministro.consumo(fecha_ini,fecha_fin)        
+    elif n:
+        f=_suministro.facturas()
+        facturas=[]
+        for i in n:
+            facturas.append(f.index[int(i)-1])
+        print(f'CONSUMO DE LAS FACTURAS:{facturas}')
+        df=_suministro.consumo_facturado(facturas)
+    elif factura:
+        factura=list(factura)
+        print(f"CONSUMO DE LAS FACTURAS:{factura}")
+        df=_suministro.consumo_facturado(factura)
+    elif fecha_fin and fecha_ini:
+        fecha_ini=timezone.localize(fecha_ini)+datetime.timedelta(hours=1)
+        fecha_fin=timezone.localize(fecha_fin)+datetime.timedelta(hours=1)
+        print(f"Consumos entre las fechas {fecha_ini} y {fecha_fin}")
+        df=_suministro.consumo(fecha_ini,fecha_fin)
+    else:
+        print("Peridos de facturacion disponibles:")
+        df=_suministro.facturas()
+        df=df.reset_index()
+        df.index=range(1,df.shape[0]+1)
+        print(df)
+        print()
+        print("Para elegir los consumos de una factura concreta usa:")
+        print("\t--n [numero factura]. Por ejemplo --n 1 para la última")
+        print(f"\t--factura [factura]. Por ejemplo --factura {df.factura[1]} para la última")
+        print("Estos argumentos se pueden repetir para considerar varios periodos de facturación:")
+        print("\tPor ejemplo --n 1 --n 2 para las dos última")
+        print(f"\tPor ejemplo --factura {df.factura[1]} --factura {df.factura[2]} para la dos última")
+        print()
+        print("Para elegir la factura en curso:")
+        print("\t--n 0")        
+        print()
+        print("Tambien se puede solicitar los consumos entre dos fechas con los argumento:")
+        print("\t--fecha-ini [fecha inicial] --fecha-fin [fecha final]")
+        return False, False
+    return datos,df
+        

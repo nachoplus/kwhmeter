@@ -54,6 +54,7 @@ class iberdrola:
         self.direccion=f"{self.infoPS['tit_DIREC'].strip()} {self.infoPS['tit_POBLA'].strip()} {self.infoPS['tit_COD_POST'].strip()}-{self.infoPS['tit_PROVIN'].strip()}"
         self.titular=f"{self.contrato['nomTitular'].strip()} {self.contrato['ape1Titular'].strip()} {self.contrato['ape2Titular'].strip()}"
         self.DNI={self.contrato['dni'].strip()}
+        self.datos={'potencias':self.potencias,'cups':self.cups,'direccion':self.direccion,'titular':self.titular,'DNI':self.DNI}
         to_day = datetime.now(timezone)-timedelta(days=0)
         from_day=to_day-timedelta(days=365)                #Maximo 1 años
         self.lista_facturas=self._facturas(from_day,to_day)

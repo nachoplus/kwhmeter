@@ -3,7 +3,7 @@ import json
 import datetime
 from pathlib import Path
 import logging
-from ..common import contador,read_config, write_config, timezone
+from ..common import contador,read_config, write_config, timezone, flex_consumos
 from ..pvpc import append_prices
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
@@ -26,44 +26,19 @@ def set_credenciales(suministro,distribuidora,user,password):
 @click.command()
 @click.argument('suministro',type=str)
 @click.option('--lista-facturas',is_flag=True, show_default=True, default=False, help="Muestra los periodos de facturación disponibles")
+@click.option('--n','n',multiple=True,type=click.INT,help="Consumos para las facturas especificadas por indice. Se puede usar tantas veces como facturas se quieran recuperar",show_default=True,default=False)
 @click.option('--factura','factura',multiple=True,help="Consumos para las facturas especificadas. Se puede usar tantas veces como facturas se quieran recuperar",show_default=True,default=False)
 @click.option('--fecha-ini', 'fecha_ini',type=click.DateTime(formats=["%Y-%m-%d"]),
-              default=str(datetime.date.today()-datetime.timedelta(days=30)),help="Fecha inicio consumos por fecha",show_default=True)
+              help="Fecha inicio consumos por fecha",show_default=True)
 @click.option('--fecha-fin', 'fecha_fin',type=click.DateTime(formats=["%Y-%m-%d"]),
-              default=str(datetime.date.today()),help="Fecha fin consumos por fecha",show_default=True)
+              help="Fecha fin consumos por fecha",show_default=True)
 @click.option('--precios',is_flag=True, show_default=True, default=False, help="Añade los precios a cada hora")              
 @click.option('--format',help="Formato de salida",
               type=click.Choice(['screen','cnmc_csv', 'excel','html'], case_sensitive=False),default='screen',show_default=True)
 @click.option('--fichero',show_default=True,default='consumos',help='Fichero de salida (sin extensión)')              
-def get_data(suministro,lista_facturas,factura,fecha_ini,fecha_fin,precios,format,fichero):
-    credenciales=read_config()
-    if not credenciales:
-        logging.error("No existe archivo de credenciales")
-        return False
-    elif not suministro in credenciales:
-        logging.error(f"El archivo de credenciales no contiene el suministro:{suministro}")
-        return False
-    _contador=contador(**credenciales[suministro])
-    if True:
-        print(f'TITULAR: {_contador.titular} CUPS:{_contador.cups}')
-        print(f'DIRECCION: {_contador.direccion}')
-        print(f'POTENCIA CONTRATADA {_contador.potencias}')
-    if lista_facturas:
-        print("Peridos de facturacion disponibles:")
-        df=_contador.facturas()
-        print(df)
-        return
-    elif factura:
-        factura=list(factura)
-        print(f"Consumos de la facturas:{factura}")
-        df=_contador.consumo_facturado(factura)
-    elif fecha_fin and fecha_ini:
-        fecha_ini=timezone.localize(fecha_ini)
-        fecha_fin=timezone.localize(fecha_fin)
-        print(f"Consumos entre las fechas {fecha_ini} y {fecha_fin}")
-        df=_contador.consumo(fecha_ini,fecha_fin)
-    else:
-        print("No se han especificado parametros")
+def get_data(suministro,lista_facturas,n,factura,fecha_ini,fecha_fin,precios,format,fichero):
+    datos,df=flex_consumos(suministro,n,factura,fecha_ini,fecha_fin)
+    if not datos:
         return
     if precios:
         df=append_prices(df)
@@ -79,11 +54,12 @@ def get_data(suministro,lista_facturas,factura,fecha_ini,fecha_fin,precios,forma
     elif format=='cnmc_csv':
         #Formato para el simulador de la CNMC
         df=df.reset_index()
-        df['CUPS']=_contador.cups        
+        df['CUPS']=datos['cups']
         df['Fecha']=df['fecha'].dt.strftime('%d/%m/%Y')
         df['Hora']=df['fecha'].dt.hour
         df['Consumo_kWh']=df['consumo']/1000
         df['Metodo_obtencion']=df['tipo']
-        df[['CUPS','Fecha','Hora','Consumo_kWh','Metodo_obtencion']].to_csv(f'{fichero}.csv',index=False,decimal=',',sep=';')        
+        df[['CUPS','Fecha','Hora','Consumo_kWh','Metodo_obtencion']].to_csv(f'{fichero}.csv',index=False,decimal=',',sep=';')   
+        print(f'fichero CNMC:{fichero}.csv creado')     
     elif format=='html':
         df.to_html(f'{fichero}.html')              
