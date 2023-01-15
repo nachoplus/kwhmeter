@@ -111,7 +111,7 @@ class eredes:
         df['fechaFin']=pd.to_datetime(df['fechaFin'],format='%d-%m-%Y').apply(lambda x:timezone.localize(x+timedelta(hours=0)))  #hasta el final del dia
         df.index=(df['fechaFin']).apply(lambda x: f'{(x+timedelta(days=1)).date()}')        
         df.index.name='factura'
-        df.sort_index(inplace=True)
+        df.sort_index(inplace=True,ascending=False)
         return df
 
     def consumo_facturado(self,lista_periodos):
