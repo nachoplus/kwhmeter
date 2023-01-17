@@ -62,11 +62,13 @@ def suministro(domicilio):
     return suministro
 
 def contador(distribuidora=None,user=None,password=None):
-    lista_distribuidoras=['iberdrola','eredes']
+    lista_distribuidoras=['iberdrola','eredes','endesa']
     if distribuidora=='iberdrola':
         from .iberdrola import iberdrola as _contador
     elif distribuidora=='eredes':
         from .eredes import eredes as _contador
+    elif distribuidora=='endesa':
+        from .endesa import endesa as _contador        
     else:
         logging.error(f'Distribuidora no soportada:{distribuidora}')
         logging.info(f"solo está soportadas las siguientes distribuidoras:{lista_distribuidoras}")

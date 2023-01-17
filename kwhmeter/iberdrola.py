@@ -56,7 +56,7 @@ class iberdrola:
         self.DNI={self.contrato['dni'].strip()}
         self.datos={'potencias':self.potencias,'cups':self.cups,'direccion':self.direccion,'titular':self.titular,'DNI':self.DNI}
         to_day = datetime.now(timezone)-timedelta(days=0)
-        from_day=to_day-timedelta(days=365)                #Maximo 1 años
+        from_day=to_day-timedelta(days=365*5)                #Maximo 5 años
         self.lista_facturas=self._facturas(from_day,to_day)
         self.nfacturas=self.lista_facturas.shape[0]
         self.factura_fechamin=self.lista_facturas.fechaInicio.min()

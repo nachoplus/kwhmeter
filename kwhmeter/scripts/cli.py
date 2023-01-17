@@ -1,5 +1,6 @@
 import click
 import json
+import numpy as np
 import datetime
 from pathlib import Path
 import logging
@@ -26,7 +27,7 @@ def set_credenciales(suministro,distribuidora,user,password):
 @click.command()
 @click.argument('suministro',type=str)
 @click.option('--lista-facturas',is_flag=True, show_default=True, default=False, help="Muestra los periodos de facturación disponibles")
-@click.option('--n','n',multiple=True,type=click.INT,help="Consumos para las facturas especificadas por indice. Se puede usar tantas veces como facturas se quieran recuperar",show_default=True,default=False)
+@click.option('--n',multiple=True,type=click.INT,help="Consumos para las facturas especificadas por indice. Se puede usar tantas veces como facturas se quieran recuperar",show_default=True,default=False)
 @click.option('--factura','factura',multiple=True,help="Consumos para las facturas especificadas. Se puede usar tantas veces como facturas se quieran recuperar",show_default=True,default=False)
 @click.option('--fecha-ini', 'fecha_ini',type=click.DateTime(formats=["%Y-%m-%d"]),
               help="Fecha inicio consumos por fecha",show_default=True)
@@ -35,13 +36,27 @@ def set_credenciales(suministro,distribuidora,user,password):
 @click.option('--precios',is_flag=True, show_default=True, default=False, help="Añade los precios a cada hora")              
 @click.option('--format',help="Formato de salida",
               type=click.Choice(['screen','cnmc_csv', 'excel','html'], case_sensitive=False),default='screen',show_default=True)
+@click.option('--periodo','-t',help="Periodo a considerar para obtener el valor promedio/acumulado ",
+              type=click.Choice(['horario','diario', 'semanal','mensual','anual'], case_sensitive=False),default='horario',show_default=True)              
+@click.option('--acumulado/--promedio','-a/-p',help="Periodo a considerar para obtener el valor acumulado ",default=True,show_default=True)              
 @click.option('--fichero',show_default=True,default='consumos',help='Fichero de salida (sin extensión)')              
-def get_data(suministro,lista_facturas,n,factura,fecha_ini,fecha_fin,precios,format,fichero):
+def get_data(suministro,lista_facturas,n,factura,fecha_ini,fecha_fin,precios,format,periodo,acumulado,fichero):
     datos,df=flex_consumos(suministro,n,factura,fecha_ini,fecha_fin)
     if not datos:
         return
     if precios:
         df=append_prices(df)
+    if acumulado:
+        fn=sum
+    else:
+        fn=np.mean
+    if periodo=='diario':
+        df=df.resample('1D').aggregate(fn)
+    elif periodo=='semanal':
+        df=df.resample('1W').aggregate(fn)
+    elif periodo=='mensual':
+        df=df.resample('1M').aggregate(fn)
+
     if format=='screen':
         print(df)
     elif format=='excel':
