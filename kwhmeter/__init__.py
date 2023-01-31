@@ -5,7 +5,7 @@ from .common import suministro,contador,timezone,data_dir, read_config
 from .pvpc import pvpc,append_prices
 import os
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
 
 if not os.path.exists(data_dir):
    os.makedirs(data_dir)

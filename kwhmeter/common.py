@@ -15,6 +15,9 @@ data_dir=os.getenv('KWHMETER_HOME',f"{home}/.kwhmeter")
 credenciales_file=f'{data_dir}/distribuidoras.yml'
 pvpc_data_file=f'{data_dir}/esios_pvpc.pkl'
 
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + datetime.timedelta(n)
 
 def periodo_tarifario(fecha_hora:datetime.datetime)->str:
     fechahora=fecha_hora-datetime.timedelta(hours=1)

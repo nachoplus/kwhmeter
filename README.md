@@ -4,17 +4,22 @@ Clientes para la lectura de contadores electricos de distribuidoras españolas.
 
 IMPORTANTE: Este software no está vinculado con ninguna compañia electrica. Es un proyecto personal que se pone a disposición de todo el que quiera utilizarlo bajo su propia responsabilidad.
 
-Este software está inspirado por: https://github.com/hectorespert/python-oligo 
+Este software agradece y da el credito a otros autores:
+
+* inspirado por: https://github.com/hectorespert/python-oligo 
+* El driver para la lectura de los datos de ENDESA distribucion está integrado con ligeras modificaciones pero no es desarrollo propio sino de https://github.com/jagalindo/edistribucion 
 
 De momento está soportados contadores de las redes de:
 
 * I-DE (Grupo Iberdrola). Identificativo: 'iberdrola'
 * EREDES DISTRIBUCION (Total Energies. Antiguo HC o EDP). Identificativo: 'eredes'
+* ENDESA DISTRIBUCION: Todo el grupo ENDESA. Sevillana, Fecsa, Enher. Identificativo: 'endesa'
 
 Para poder consultar el contador es necesario darse de alta previamente en la correspondiente web y que los datos se obtiene de esa pagina mediante técnicas de webscraping. Las webs de las distribuidoras son:
 
 * I-DE: https://www.i-de.es/consumidores/web/guest/login
 * EREDES: https://misconsumos.eredesdistribucion.es/
+* ENDESA DISTRIBUCION: https://www.edistribucion.com/
 
 Adicionalmente optiene los precios de la energia oficiales de la web de REE https://www.esios.ree.es/es/pvpc. Recupera los segmentos:
 

@@ -2,6 +2,10 @@
 *.csv
 *.xlsx
 *.html
+*.access
+*.session
+credentials.py
+test_endesa.ipynb
 # Created by https://www.gitignore.io/api/pydev,linux,macos,python,pycharm+all
 # Edit at https://www.gitignore.io/?templates=pydev,linux,macos,python,pycharm+all
 
