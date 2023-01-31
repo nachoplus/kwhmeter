@@ -83,7 +83,7 @@ def contador(distribuidora=None,user=None,password=None):
         logging.error('Login invalido')
     return contador    
 
-def flex_consumos(domicilio,n=False,factura=False,fecha_ini=False,fecha_fin=False):
+def flex_consumos(domicilio,n=False,m=False,factura=False,fecha_ini=False,fecha_fin=False):
     '''
     recupera los consumos de un suministros basandose en uno 
     de los siguienetes datos:
@@ -106,6 +106,11 @@ def flex_consumos(domicilio,n=False,factura=False,fecha_ini=False,fecha_fin=Fals
         for i in n:
             facturas.append(f.index[int(i)-1])
         print(f'CONSUMO DE LAS FACTURAS:{facturas}')
+        df=_suministro.consumo_facturado(facturas)
+    elif m:
+        f=_suministro.facturas()
+        facturas=[f.index[i] for i in range(int(m))]
+        print(f'CONSUMO DE LAS {m} ULTIMAS FACTURAS:{facturas}')
         df=_suministro.consumo_facturado(facturas)
     elif factura:
         factura=list(factura)

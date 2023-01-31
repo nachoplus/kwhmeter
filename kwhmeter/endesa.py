@@ -73,15 +73,15 @@ class endesa:
                 df=ddf
             else:
                 df=pd.concat([df,ddf])
-            #limpieza
-            df['fecha']=pd.to_datetime(df.date,format='%d/%m/%Y')                
-            df['fecha']=df.apply(lambda row: timezone.localize(row['fecha'])+timedelta(hours=row['hourCCH']),axis=1)
-            df['consumo']=df['valueDouble']*1000            
-            df.drop(['date','hourCCH','hour','valueDouble','invoiced','typePM','cups','date_fileName','real','value'],axis=1,inplace=True)                            
-            df.rename({'obtainingMethod':'tipo'},axis=1,inplace=True)
-            df.set_index('fecha',inplace=True)
-            df.loc[:,'periodo']=df.index.map(periodo_tarifario)            
-            df=df[['factura','consumo','periodo','tipo','factura_endesa']]
+        #limpieza
+        df['_fecha']=pd.to_datetime(df.date,format='%d/%m/%Y')   
+        df['fecha']=df.apply(lambda row: timezone.localize(row['_fecha'])+timedelta(hours=row['hourCCH']),axis=1)
+        df['consumo']=df['valueDouble']*1000            
+        df.drop(['date','hourCCH','hour','valueDouble','invoiced','typePM','cups','date_fileName','real','value'],axis=1,inplace=True)                            
+        df.rename({'obtainingMethod':'tipo'},axis=1,inplace=True)
+        df.set_index('fecha',inplace=True)
+        df.loc[:,'periodo']=df.index.map(periodo_tarifario)            
+        df=df[['factura','consumo','periodo','tipo','factura_endesa']]
         return df
 
     def consumo(self,start,end):

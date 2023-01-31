@@ -39,25 +39,40 @@ Existen dos ejecutables de la linea de comandos (CLI):
 * kwhmeter. Es el comando principal mediante el cual se recuperan las medidas
 
 > kwhmeter --help
+> 
 > Usage: kwhmeter [OPTIONS] SUMINISTRO
 > 
 > Options:
 >   --lista-facturas                Muestra los periodos de facturación
 >                                   disponibles  [default: False]
 > 
+>   --n INTEGER                     Consumos para las facturas especificadas por
+>                                   indice. Se puede usar tantas veces como
+>                                   facturas se quieran recuperar  [default:
+>                                   False]
+> 
+>   --m INTEGER                     Consumos para las ultimas m facturas
+>                                   [default: False]
+> 
 >   --factura TEXT                  Consumos para las facturas especificadas. Se
 >                                   puede usar tantas veces como facturas se
 >                                   quieran recuperar  [default: False]
 > 
->   --fecha-ini [%Y-%m-%d]          Fecha inicio consumos por fecha  
-> 
->   --fecha-fin [%Y-%m-%d]          Fecha fin consumos por fecha  
-> 
+>   --fecha-ini [%Y-%m-%d]          Fecha inicio consumos por fecha
+>   --fecha-fin [%Y-%m-%d]          Fecha fin consumos por fecha
 >   --precios                       Añade los precios a cada hora  [default:
 >                                   False]
 > 
 >   --format [screen|cnmc_csv|excel|html]
 >                                   Formato de salida  [default: screen]
+>   -t, --periodo [horario|diario|semanal|mensual|anual]
+>                                   Periodo a considerar para obtener el valor
+>                                   promedio/acumulado   [default: horario]
+> 
+>   -a, --acumulado / -p, --promedio
+>                                   Periodo a considerar para obtener el valor
+>                                   acumulado   [default: True]
+> 
 >   --fichero TEXT                  Fichero de salida (sin extensión)  [default:
 >                                   consumos]
 > 
