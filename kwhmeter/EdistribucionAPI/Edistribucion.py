@@ -3,6 +3,11 @@
 Created on Wed May 20 11:42:56 2020
 
 @author: trocotronic
+
+slightly modificated by nacho mas:
+* remove credentials.py dependency
+* lower the default logging level to ERROR
+
 """
 
 __VERSION__ = '0.6.0'

@@ -85,34 +85,45 @@ class endesa:
         return df
 
     def consumo(self,start,end):
+        #recuperamos el consumo facturado que tiene ya los estimados y es mas fiable
+        facturas=self.lista_facturas 
+        mask= (facturas['fechaInicio']>=start) & (facturas['fechaInicio']<=end) | (facturas['fechaFin']>=start) & (facturas['fechaFin']<=end) | (facturas['fechaInicio']<=end) & (facturas['fechaFin']>=start)
+        lista_fac=facturas[mask].index.to_list()
+        logging.debug(f'Recuperando periodos de facturación:{lista_fac}')
+        con_facturado=self.consumo_facturado(lista_fac)
+        #si el periodo es mayor que lo registrado en el consumo facturado
+        #lo completamos con el consumo contador
+        if con_facturado is False:
+            df=self.consumo_contador(start,end)
+        else:
+            df=con_facturado
+            if con_facturado.index.max() < end:
+                con_contador=self.consumo_contador(con_facturado.index.max(),end)  
+                if not con_contador is False:
+                   df=pd.concat([df,con_contador])
+        return df[start:end]
+
+    def consumo_contador(self,start,end):
+        #La API no funciona como debe y hay que pedir los 
+        #consumos dia a dia
         for i,d in enumerate(daterange(start,end)):
             start_str = d.strftime('%Y-%m-%d')
             meas=self.edis.get_meas_interval(self.contador, start_str, None)
-            print(i)
             if i==0:
                 df=pd.DataFrame(meas[0])
             else:
                 df=pd.concat([df,pd.DataFrame(meas[0])])
-
-        if False:
-            df['fecha']=df['datetime'].apply(lambda x:self.fix_date(x))
-            df['consumo']=df['consumo'].astype(float)*1000
-            df['tipo']=df['estimated'].apply(lambda x: x.upper())
-            df.drop(['datetime','estimated'],axis=1,inplace=True)
-            df.set_index('fecha',inplace=True)
-            df.sort_index(inplace=True)
-            df.index.name='fecha'
-            df['periodo']=df.index.map(periodo_tarifario)
-            for k,v in facturas.to_dict(orient='index').items():
-                df.loc[v['fechaInicio']:v['fechaFin'],'factura']=k
-            #Los consumos sin numero de factura y posteriores a la ultima factura
-            #se asignan a una supuesta factura 'en curso'
-            ultimafechafactura=facturas['fechaFin'].max()
-            mask= df['factura'].isna() & (df.index >ultimafechafactura)
-            df.loc[ mask ,'factura']='en curso'
-
-            #se borran los registros sin consumo
-            df.dropna(subset=['consumo'],inplace=True)
+        df['factura_endesa']=None
+        df['factura']="En curso"
+        #limpieza
+        df['_fecha']=pd.to_datetime(df.date,format='%d/%m/%Y')   
+        df['fecha']=df.apply(lambda row: timezone.localize(row['_fecha'])+timedelta(hours=row['hourCCH']),axis=1)
+        df['consumo']=df['valueDouble']*1000            
+        df.drop(['date','hourCCH','hour','valueDouble','invoiced','typePM','cups','date_fileName','real','value'],axis=1,inplace=True)                            
+        df.rename({'obtainingMethod':'tipo'},axis=1,inplace=True)
+        df.set_index('fecha',inplace=True)
+        df.loc[:,'periodo']=df.index.map(periodo_tarifario)            
+        df=df[['factura','consumo','periodo','tipo','factura_endesa']]        
         return df
 
     def facturas(self):
