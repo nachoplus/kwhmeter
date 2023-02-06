@@ -36,7 +36,7 @@ def set_credenciales(suministro,distribuidora,user,password):
               help="Fecha fin consumos por fecha",show_default=True)
 @click.option('--precios',is_flag=True, show_default=True, default=False, help="Añade los precios a cada hora")              
 @click.option('--format',help="Formato de salida",
-              type=click.Choice(['screen','cnmc_csv', 'excel','html'], case_sensitive=False),default='screen',show_default=True)
+              type=click.Choice(['screen','cnmc_csv', 'excel','html','pkl'], case_sensitive=False),default='screen',show_default=True)
 @click.option('--periodo','-t',help="Periodo a considerar para obtener el valor promedio/acumulado ",
               type=click.Choice(['horario','diario', 'semanal','mensual','anual'], case_sensitive=False),default='horario',show_default=True)              
 @click.option('--acumulado/--promedio','-a/-p',help="Periodo a considerar para obtener el valor acumulado ",default=True,show_default=True)              
@@ -60,6 +60,8 @@ def get_data(suministro,lista_facturas,n,m,factura,fecha_ini,fecha_fin,precios,f
 
     if format=='screen':
         print(df)
+    elif format=='pkl':
+        df.to_pickle(f'{fichero}.pkl')
     elif format=='excel':
         #Excel no soporta tz aware timestamps
         df=df.reset_index()

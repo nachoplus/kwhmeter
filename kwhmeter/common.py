@@ -62,6 +62,7 @@ def write_config(suministro=None,distribuidora=None,user=None,password=None):
 def suministro(domicilio):
     credenciales=read_config()
     suministro = contador(**credenciales[domicilio])
+    suministro.datos.update({'name':domicilio})
     return suministro
 
 def contador(distribuidora=None,user=None,password=None):
@@ -109,8 +110,9 @@ def flex_consumos(domicilio,n=False,m=False,factura=False,fecha_ini=False,fecha_
         df=_suministro.consumo_facturado(facturas)
     elif m:
         f=_suministro.facturas()
-        facturas=[f.index[i] for i in range(int(m))]
-        print(f'CONSUMO DE LAS {m} ULTIMAS FACTURAS:{facturas}')
+        mprima=min(len(f),m)
+        facturas=[f.index[i] for i in range(int(mprima))]
+        print(f'CONSUMO DE LAS {mprima} ULTIMAS FACTURAS:{facturas}')
         df=_suministro.consumo_facturado(facturas)
     elif factura:
         factura=list(factura)
