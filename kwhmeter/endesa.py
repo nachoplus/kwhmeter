@@ -6,7 +6,7 @@ from .pvpc import pvpc
 import logging
 
 from .EdistribucionAPI import Edistribucion
-logging.getLogger().setLevel(logging.ERROR)
+logging.getLogger().setLevel(logging.INFO)
 
 
 class endesa:
@@ -58,6 +58,7 @@ class endesa:
         if facturas.shape[0]==0:
             logging.error(f"no existen los periodos de facturas especificados: {lista_periodos}")
             return False
+        logging.info(f"Facturas especificados: {lista_periodos}")        
         first=True
         for index,factura in facturas.iterrows():
             meas = self.edis.get_meas(self.contador, self.cycles[index])
@@ -68,6 +69,7 @@ class endesa:
                     ddf=pd.concat([ddf,pd.DataFrame(mday)])
             ddf['factura_endesa']=factura['numero']
             ddf['factura']=factura['factura']
+            
             if first:
                 first=False
                 df=ddf
@@ -89,8 +91,9 @@ class endesa:
         facturas=self.lista_facturas 
         mask= (facturas['fechaInicio']>=start) & (facturas['fechaInicio']<=end) | (facturas['fechaFin']>=start) & (facturas['fechaFin']<=end) | (facturas['fechaInicio']<=end) & (facturas['fechaFin']>=start)
         lista_fac=facturas[mask].index.to_list()
-        logging.debug(f'Recuperando periodos de facturación:{lista_fac}')
+        logging.error(f'Recuperando periodos de facturación:{lista_fac}')
         con_facturado=self.consumo_facturado(lista_fac)
+        print(con_facturado)
         #si el periodo es mayor que lo registrado en el consumo facturado
         #lo completamos con el consumo contador
         if con_facturado is False:
@@ -101,8 +104,13 @@ class endesa:
                 con_contador=self.consumo_contador(con_facturado.index.max(),end)  
                 if not con_contador is False:
                    df=pd.concat([df,con_contador])
-        df.dropna(subset='consumo',inplace=True)                   
-        return df[start:end]
+        df.dropna(subset='consumo',inplace=True)    
+        df.sort_index(inplace=True)
+        print(df)               
+        realend=min(df.index.max(),end)
+        print(start,end,realend)
+        print(df[start:realend])
+        return df[start:realend]
 
     def consumo_contador(self,start,end):
         #La API no funciona como debe y hay que pedir los 

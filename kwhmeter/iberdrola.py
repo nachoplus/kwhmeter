@@ -172,7 +172,9 @@ class iberdrola:
                 con_contador=self.consumo_contador(con_facturado.index.max(),end)  
                 if not con_contador is False:
                    df=pd.concat([df,con_contador])
-        return df[start:end]
+        df.sort_index(inplace=True)                   
+        realend=min(df.index.max(),end)
+        return df[start:realend]
 
 
     def virtual_call(self,url,start,end):

@@ -170,7 +170,10 @@ class eredes:
 
         #se borran los registros sin consumo
         df.dropna(subset=['consumo'],inplace=True)
-        return df[start:end]
+        df.sort_index(inplace=True)        
+        realend=min(df.index.max(),end)
+        return df[start:realend]
+
 
     def facturas(self):
         return self.lista_facturas
