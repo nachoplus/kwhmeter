@@ -29,6 +29,7 @@ def set_credenciales(suministro,distribuidora,user,password):
 @click.option('--lista-facturas',is_flag=True, show_default=True, default=False, help="Muestra los periodos de facturación disponibles")
 @click.option('--n',multiple=True,type=click.INT,help="Consumos para las facturas especificadas por indice. Se puede usar tantas veces como facturas se quieran recuperar",show_default=True,default=False)
 @click.option('--m',multiple=False,type=click.INT,help="Consumos para las ultimas m facturas",show_default=True,default=False)
+@click.option('--d',multiple=False,type=click.INT,help="Consumos para los ultimos d dias",show_default=True,default=False)
 @click.option('--factura','factura',multiple=True,help="Consumos para las facturas especificadas. Se puede usar tantas veces como facturas se quieran recuperar",show_default=True,default=False)
 @click.option('--fecha-ini', 'fecha_ini',type=click.DateTime(formats=["%Y-%m-%d"]),
               help="Fecha inicio consumos por fecha",show_default=True)
@@ -41,8 +42,8 @@ def set_credenciales(suministro,distribuidora,user,password):
               type=click.Choice(['horario','diario', 'semanal','mensual','anual'], case_sensitive=False),default='horario',show_default=True)              
 @click.option('--acumulado/--promedio','-a/-p',help="Periodo a considerar para obtener el valor acumulado ",default=True,show_default=True)              
 @click.option('--fichero',show_default=True,default='consumos',help='Fichero de salida (sin extensión)')              
-def get_data(suministro,lista_facturas,n,m,factura,fecha_ini,fecha_fin,precios,format,periodo,acumulado,fichero):
-    datos,df=flex_consumos(suministro,n,m,factura,fecha_ini,fecha_fin)
+def get_data(suministro,lista_facturas,n,m,d,factura,fecha_ini,fecha_fin,precios,format,periodo,acumulado,fichero):
+    datos,df=flex_consumos(suministro,n,m,d,factura,fecha_ini,fecha_fin)
     if not datos:
         return
     if precios:

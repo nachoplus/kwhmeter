@@ -101,6 +101,7 @@ class endesa:
                 con_contador=self.consumo_contador(con_facturado.index.max(),end)  
                 if not con_contador is False:
                    df=pd.concat([df,con_contador])
+        df.dropna(subset='consumo',inplace=True)                   
         return df[start:end]
 
     def consumo_contador(self,start,end):
