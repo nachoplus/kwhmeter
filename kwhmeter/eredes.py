@@ -110,9 +110,11 @@ class eredes:
             logging.warning(f"No result in response:{response.json()}")  
         data=json.loads(response.json()['result'])
         df=pd.DataFrame(data['periodos'])    
-        df['fechaInicio']=pd.to_datetime(df['fechaInicio'],format='%d-%m-%Y').apply(lambda x:timezone.localize(x+timedelta(days=1)))        
-        df['fechaFin']=pd.to_datetime(df['fechaFin'],format='%d-%m-%Y').apply(lambda x:timezone.localize(x+timedelta(hours=0)))  #hasta el final del dia
-        df.index=(df['fechaFin']).apply(lambda x: f'{(x+timedelta(days=1)).date()}')        
+        #Criterio de fechas
+        #Las facturas parecen empezar a las 01:00 horas del primer dia y acabar a las 00:00 del ultimo dia
+        df['fechaInicio']=pd.to_datetime(df['fechaInicio'],format='%d-%m-%Y').apply(lambda x:timezone.localize(x+timedelta(days=0)))        
+        df['fechaFin']=pd.to_datetime(df['fechaFin'],format='%d-%m-%Y').apply(lambda x:timezone.localize(x+timedelta(days=1)))  #hasta el final del dia
+        df.index=(df['fechaFin']).apply(lambda x: f'{(x+timedelta(days=0)).date()}')        
         df.index.name='factura'
         df.sort_index(inplace=True,ascending=False)
         return df

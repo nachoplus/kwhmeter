@@ -6,7 +6,7 @@ from .pvpc import pvpc
 import logging
 
 from .EdistribucionAPI import Edistribucion
-logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.ERROR)
 
 
 class endesa:
@@ -91,7 +91,7 @@ class endesa:
         facturas=self.lista_facturas 
         mask= (facturas['fechaInicio']>=start) & (facturas['fechaInicio']<=end) | (facturas['fechaFin']>=start) & (facturas['fechaFin']<=end) | (facturas['fechaInicio']<=end) & (facturas['fechaFin']>=start)
         lista_fac=facturas[mask].index.to_list()
-        logging.error(f'Recuperando periodos de facturación:{lista_fac}')
+        logging.info(f'Recuperando periodos de facturación:{lista_fac}')
         con_facturado=self.consumo_facturado(lista_fac)
         #si el periodo es mayor que lo registrado en el consumo facturado
         #lo completamos con el consumo contador
