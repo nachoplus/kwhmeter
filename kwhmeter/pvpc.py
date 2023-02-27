@@ -8,6 +8,14 @@ import os
 import logging
 import numpy as np
 
+__headers = {
+
+    'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/77.0.3865.90 Chrome/77.0.3865.90 Safari/537.36",
+    'accept': "application/json; charset=utf-8",
+    'content-type': "application/json; charset=utf-8",
+    'cache-control': "no-cache",
+}
+
 def pvpc(start,end):
     fechas=pd.date_range(start,end,freq='1D',normalize=True)
     if os.path.exists(pvpc_data_file):
@@ -59,9 +67,10 @@ def _pvpc(date_list):
     has_data=False
     first=True
     for i,fecha in enumerate(list(set(date_list))):
-        url=f'{urlbase}&start_date={fecha.isoformat()}&end_date={fecha.isoformat()}'
+        url=f'{urlbase}&start_date={fecha.isoformat()}&end_date={fecha.isoformat()}&date_type=datos'
         logging.info(f'{i} {url}')
-        response=requests.get(url)
+        response=requests.get(url,headers=__headers)
+        #print(response.json())
         if not 'PVPC' in response.json():
             logging.warning(f'{i} no hay datos para la fecha:{fecha}')
             continue
