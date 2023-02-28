@@ -15,7 +15,7 @@ setup(
     url="https://github.com/nachoplus/kwhmeter.git",
     packages=find_packages(),
     install_requires=[
-        'ruamel.yaml',
+        'pyyaml',
         'requests',
         'workalendar',
         'pandas'
