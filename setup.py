@@ -15,6 +15,7 @@ setup(
     url="https://github.com/nachoplus/kwhmeter.git",
     packages=find_packages(),
     install_requires=[
+        'yaml',
         'requests',
         'workalendar',
         'pandas'
