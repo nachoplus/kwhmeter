@@ -2,3 +2,4 @@ requests
 pandas
 workalendar
 pyyaml
+click
