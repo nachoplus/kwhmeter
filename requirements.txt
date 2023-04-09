@@ -2,4 +2,4 @@ requests
 pandas
 workalendar
 pyyaml
-click
+click==7.1.2

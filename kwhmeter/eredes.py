@@ -112,7 +112,7 @@ class eredes:
         df=pd.DataFrame(data['periodos'])    
         #Criterio de fechas
         #Las facturas parecen empezar a las 01:00 horas del primer dia y acabar a las 00:00 del ultimo dia
-        df['fechaInicio']=pd.to_datetime(df['fechaInicio'],format='%d-%m-%Y').apply(lambda x:timezone.localize(x+timedelta(days=0)))        
+        df['fechaInicio']=pd.to_datetime(df['fechaInicio'],format='%d-%m-%Y').apply(lambda x:timezone.localize(x+timedelta(days=1)))        
         df['fechaFin']=pd.to_datetime(df['fechaFin'],format='%d-%m-%Y').apply(lambda x:timezone.localize(x+timedelta(days=1)))  #hasta el final del dia
         df.index=(df['fechaFin']).apply(lambda x: f'{(x+timedelta(days=0)).date()}')        
         df.index.name='factura'
