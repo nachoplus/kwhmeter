@@ -61,7 +61,7 @@ def _pvpc(date_list):
     # CCVPCB y CCVCYM Coste comercialización variable
     # EDSRPCB y EDSRCYM Excedente o déficit subastas renovables
     # EDCGASPCB EXCEDENTE O DÉFICIT MECANISMO AJUSTE COSTE PRODUCCIÓN
-    #
+    # TAHPCB y TAHCYM termino mercado a plazos
     # Estos terminos están vigentes desde el tope del gas. Para fechas nateriores 
     # hay otros terminos
     has_data=False
@@ -105,11 +105,18 @@ def _pvpc(date_list):
 
 def append_prices(df):
         PVPC=pvpc(df.index.min(),df.index.max())
-        col_list=['PCB']
+        # PCB Coste total suma de todos los terminos
+        # PMHPCB Coste mercado diario e intradiario
+        col_list=['PCB','PMHPCB']  
         if 'EDCGASPCB' in PVPC.columns:
+            # Termino de ajuste gas excepcion iberica
             col_list.append('EDCGASPCB')
         if 'TEUPCB' in PVPC.columns:
+            # Termino de peajes ycargos
             col_list.append('TEUPCB')
+        if 'TAHPCB' in PVPC.columns:
+            # Termino de ajuste mercado a plazos
+            col_list.append('TAHPCB')    
         df=df.merge(PVPC[col_list],left_index=True,right_index=True,how='left')
         df.rename({ col:f'{col}_PRICE' for col in col_list},axis=1,inplace=True)
         for col in col_list:
