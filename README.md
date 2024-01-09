@@ -21,10 +21,12 @@ Para poder consultar el contador es necesario darse de alta previamente en la co
 * EREDES: https://misconsumos.eredesdistribucion.es/
 * ENDESA DISTRIBUCION: https://www.edistribucion.com/
 
-Adicionalmente optiene los precios de la energia oficiales de la web de REE https://www.esios.ree.es/es/pvpc. Recupera los segmentos:
+Adicionalmente obtienen los precios de la energia oficiales de la web de REE https://www.esios.ree.es/es/pvpc. Recupera los segmentos:
 
 * EDCGASPCB: Precio por el concepto de 'tope al gas'
 * TEUPCB: Precio correspondiente a los peajes y cargos
+* PMHPCB: Precio correspondiente los mercados diario e intradiario
+* TAHPCB: Precio correspondiente los mercados a plazos
 * PCB: Precio total para el PVPC. Incorpora los dos anteriores mas el precio de la energia en los mercados mayoristas y otros conceptos menores.
 
 Este programa utiliza el directorio definido en la variable de entorno KWHMETER_HOME para almacenar las credenciales y el cache de precios del eSios. Por defecto KWHMETER_HOME es $HOME/.kwhmeter
