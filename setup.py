@@ -5,7 +5,6 @@ with open("README.md", "r") as fh:
 
 setup(
     name="kwhmeter",
-    version_config=True,
     setup_requires=['setuptools-git-versioning'],
     author="nachomas",
     author_email="mas.ignacio@gmail.com",
@@ -19,10 +18,14 @@ setup(
         'pyyaml',
         'requests',
         'workalendar',
-        'pandas'
+        'pandas',
+        'openpyxls'
     ],
     extras_require={
 
+    },
+    setuptools_git_versioning={
+        "enabled": True,
     },
     classifiers=[
         "Programming Language :: Python :: 3",
