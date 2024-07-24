@@ -3,3 +3,4 @@ pandas
 workalendar
 pyyaml
 click==7.1.2
+openpyxls
