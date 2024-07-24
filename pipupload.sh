@@ -1,4 +1,4 @@
-tagname='0.1.1'
+tagname='0.1.2'
 git tag --delete ${tagname}
 git tag ${tagname}   -m "first pip version"
 git push origin :refs/tags/${tagname}
