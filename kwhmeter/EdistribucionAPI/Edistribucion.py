@@ -23,7 +23,7 @@ from dateutil.tz import tzutc
 UTC = tzutc()
 
 logging.basicConfig(format='[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
-logging.getLogger().setLevel(logging.ERROR)
+logging.getLogger().setLevel(logging.DEBUG)
 
 class EdisError(Exception):
     def __init__(self, message):
@@ -305,6 +305,7 @@ class Edistribucion():
             raise EdisError('auraConfig not found. Cannot continue')
         ix = r.text.find('{',ix)
         ed = r.text.find(';',ix)
+        logging.debug(f"r:{r} ix:{ix} ed:{ed}")
         jr = json.loads(r.text[ix:ed])
         if ('token' not in jr):
             raise EdisError('token not found. Cannot continue')

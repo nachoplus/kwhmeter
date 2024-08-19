@@ -19,7 +19,8 @@ setup(
         'requests',
         'workalendar',
         'pandas',
-        'openpyxl'
+        'openpyxl',
+        'bs4'
     ],
     extras_require={
 
