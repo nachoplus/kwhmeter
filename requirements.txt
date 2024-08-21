@@ -5,3 +5,5 @@ pyyaml
 click==7.1.2
 openpyxl
 bs4
+python-dateutil
+pyjsparser

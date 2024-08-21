@@ -7,23 +7,22 @@ Created on Wed May 20 11:42:56 2020
 slightly modificated by nacho mas:
 * remove credentials.py dependency
 * lower the default logging level to ERROR
-
 """
 
-__VERSION__ = '0.6.0'
+__VERSION__ = '0.8.1'
 
-import requests, pickle, json, os, math
+import requests, pickle, json
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse, unquote
+from urllib.parse import unquote
 import logging
 from datetime import datetime, timedelta
 from dateutil.tz import tzutc
-
+from pyjsparser import parse as jsparse
 
 UTC = tzutc()
 
 logging.basicConfig(format='[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.ERROR)
 
 class EdisError(Exception):
     def __init__(self, message):
@@ -109,14 +108,13 @@ class Edistribucion():
     __dashboard = 'https://zonaprivada.edistribucion.com/areaprivada/s/sfsites/aura?'
     __command_index = 0
     __identities = {}
-    __appInfo = None
     __context = None
     __access_date = datetime.now()
 
     def __init__(self, login=None, password=None, debug_level=logging.ERROR):
         self.__session = requests.Session()
-        self.__credentials['user'] = login 
-        self.__credentials['password'] = password 
+        self.__credentials['user'] = login
+        self.__credentials['password'] = password
 
         try:
             with open(Edistribucion.SESSION_FILE, 'rb') as f:
@@ -150,8 +148,10 @@ class Edistribucion():
         logging.info('Sending %s request to %s', r.request.method, r.url)
         logging.debug('Parameters: %s', r.request.url)
         logging.debug('Headers: %s', r.request.headers)
+        logging.debug(f'Post data: {post}')
         logging.info('Response with code: %d', r.status_code)
         logging.debug('Headers: %s', r.headers)
+        logging.debug(f'Cookies: {r.cookies.get_dict()}')
         logging.debug('History: %s', r.history)
         if r.status_code >= 400:
             try:
@@ -173,13 +173,13 @@ class Edistribucion():
     def __command(self, command, post=None, dashboard=None, accept='*/*', content_type=None, recursive=False):
         if (not dashboard):
             dashboard = self.__dashboard
-        if (self.__command_index):
-            command = 'r='+self.__command_index+'&'
+        if (self.__command_index >= 0):
+            command = f'r={self.__command_index}&{command}'
             self.__command_index += 1
         logging.info('Preparing command: %s', command)
         if (post):
             post['aura.context'] = self.__context
-            post['aura.pageURI'] = '/areaprivada/s/wp-online-access'
+            post['aura.pageURI'] = '/areaprivada/s/'
             post['aura.token'] = self.__token
             logging.debug('POST data: %s', post)
         logging.debug('Dashboard: %s', dashboard)
@@ -210,6 +210,14 @@ class Edistribucion():
             else:
                 logging.warning('Redirection received twice. Aborting command.')
         if ('json' in r.headers['Content-Type']):
+            if ('Invalid token' in r.text):
+                if (not recursive):
+                    self.__session = requests.Session()
+                    #self.__force_login()
+                    self.__token = self.__get_token()
+                    self.__command(command=command, post=post, dashboard=dashboard, accept=accept, content_type=content_type, recursive=True)
+                else:
+                    logging.warning('Token expired. Cannot refresh')
             jr = r.json()
             if (jr['actions'][0]['state'] != 'SUCCESS'):
                 if (not recursive):
@@ -245,6 +253,46 @@ class Edistribucion():
             return self.__force_login()
         return True
 
+    def __get_token(self):
+        r = self.__get_url('https://zonaprivada.edistribucion.com/areaprivada/s/')
+        self.__update_context(r.text)
+        soup = BeautifulSoup(r.text, 'html.parser')
+        scripts = soup.find_all('script')
+        logging.info('Loading token scripts')
+        for s in scripts:
+            if (s.string and 'auraConfig' in s.string):
+                prsr = jsparse(s.string)
+                for b in prsr['body']:
+                    decls = b.get('expression', {}).get('callee', {}).get('body', {}).get('body', [])
+                    for d in decls:
+                        if (d.get('type', None) == 'VariableDeclaration'):
+                            for dc in d.get('declarations', []):
+                                if (dc.get('id', {}).get('name', None) == 'auraConfig'):
+                                    for prop in dc.get('init', {}).get('properties', []):
+                                        if (prop.get('key', {}).get('value', None) == 'eikoocnekot'):
+                                            cookie_var = prop.get('value', {}).get('value', None)
+                                            ret = self.__session.cookies.get_dict().get(cookie_var, None)
+                                            del self.__session.cookies[cookie_var]
+                                            return ret
+        return None
+
+    def __update_context(self, text):
+        soup = BeautifulSoup(text, 'html.parser')
+        scripts = soup.find_all('script')
+        logging.info('Loading scripts')
+        for s in scripts:
+            src = s.get('src')
+            if (not src):
+                continue
+            if ('resources.js' in src):
+                unq = unquote(src)
+                try:
+                    path = unq[unq.find('{'):unq.rindex('}')+1]
+                    j = json.loads(path)
+                    self.__context = f'{{"mode":"{j["mode"]}","fwuid":"{j["fwuid"]}","app":"{j["app"]}","loaded":{json.dumps(j["loaded"]).replace(" ","")},"dn":[],"globals":{{}},"uad":false}}'
+                except Exception:
+                    raise EdisError('Cannot obtain context')
+
     def __force_login(self, recursive=False):
         logging.warning('Forcing login')
         r = self.__get_url('https://zonaprivada.edistribucion.com/areaprivada/s/login?ec=302&startURL=%2Fareaprivada%2Fs%2F')
@@ -252,20 +300,7 @@ class Edistribucion():
         if (ix == -1):
             raise EdisError('auraConfig not found. Cannot continue')
 
-        soup = BeautifulSoup(r.text, 'html.parser')
-        scripts = soup.find_all('script')
-        logging.info('Loading scripts')
-        for s in scripts:
-            src = s.get('src')
-            if (not src):
-                continue
-            #print(s)
-            upr = urlparse(r.url)
-            #r = self.__get_url(upr.scheme+'://'+upr.netloc+src)
-            if ('resources.js' in src):
-                unq = unquote(src)
-                self.__context = unq[unq.find('{'):unq.rindex('}')+1]
-                self.__appInfo = json.loads(self.__context)
+        self.__update_context(r.text)
         logging.info('Performing login routine')
 
         params = {
@@ -286,7 +321,7 @@ class Edistribucion():
                 'aura.pageURI':'/areaprivada/s/login/?language=es&startURL=%2Fareaprivada%2Fs%2F&ec=302',
                 'aura.token':'undefined',
                 }
-        r = self.__get_url(self.__dashboard+'other.LightningLoginForm.login=1',post=data)
+        r = self.__get_url(self.__dashboard+'r=1&other.LightningLoginForm.login=1',post=data)
         #print(r.text)
         if ('/*ERROR*/' in r.text):
             if ('invalidSession' in r.text and not recursive):
@@ -299,17 +334,9 @@ class Edistribucion():
         logging.info('Accessing to frontdoor')
         r = self.__get_url(jr['events'][0]['attributes']['values']['url'])
         logging.info('Accessing to landing page')
-        r = self.__get_url('https://zonaprivada.edistribucion.com/areaprivada/s/')
-        ix = r.text.find('auraConfig')
-        if (ix == -1):
-            raise EdisError('auraConfig not found. Cannot continue')
-        ix = r.text.find('{',ix)
-        ed = r.text.find(';',ix)
-        logging.debug(f"r:{r} ix:{ix} ed:{ed}")
-        jr = json.loads(r.text[ix:ed])
-        if ('token' not in jr):
+        self.__token = self.__get_token()
+        if (not self.__token):
             raise EdisError('token not found. Cannot continue')
-        self.__token = jr['token']
         logging.info('Token received!')
         logging.debug(self.__token)
         logging.info('Retreiving account info')
@@ -364,7 +391,7 @@ class Edistribucion():
     def get_meter(self, cups):
         action = EdistribucionMessageAction(
             522,
-            "WP_ContadorICP_F2_CTRL/ACTION$consultarContador",
+            "WP_ContadorICP_F2_CTRL/ACTION$consultarContador2",
             "WP_Reconnect_Detail",
             {"cupsId": cups}
         )
@@ -485,7 +512,7 @@ class Edistribucion():
             1362,
             "WP_Measure_v3_CTRL/ACTION$getChartPointsByRange",
             "WP_Measure_Detail_Filter_Advanced_v3",
-            {"contId": cont, "startDate": startDate, "endDate": endDate}
+            {"contId": cont, "type": 4, "startDate": startDate, "endDate": endDate}
         )
 
         r = self.__run_action_command(action)

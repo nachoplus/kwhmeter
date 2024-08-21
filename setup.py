@@ -20,7 +20,9 @@ setup(
         'workalendar',
         'pandas',
         'openpyxl',
-        'bs4'
+        'bs4',
+        'python-dateutil',
+        'pyjsparser'
     ],
     extras_require={
 
